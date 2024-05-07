@@ -31,7 +31,15 @@ class Arvore{
             }
         }
 
-        //Devolve a altura da arvore atravez de chamadas recursivas
+        //Devolve a altura da arvore atravez de chamada
+        
+        
+        
+        
+        
+        
+        
+        // recursivas
         int AlturaArvore(Node* raiz){
             
             //Se não ouver um nó devolve -1
@@ -161,32 +169,41 @@ class Arvore{
 
         }
 
-        //Prepara o Nó de segundo grau para deleção somente trocando o seu dado com o do seu filho mais a direita da sua esqueda tornando o nó procurado em folha
+        //Deleta Nós com dois filhos
         void DeletarNodeGrau2(Node* pai, Node* filho){
 
+            //Salva o valor do nome procurado
             string SalvarContato = filho->contato->GetNome();
             
-            //Troca o dado do filho
+            //Cria o node mais adireita da esquerda do filho
             Node* maisDireita = MaisDireita(filho);
 
-            //Troca o dado de ambos os nós
+            //Troca o dado de ambos os nós, só o contato não do ponteiro
             Contato* DadoTemporario = maisDireita->contato;
             maisDireita->contato = filho->contato;
             filho->contato = DadoTemporario;
             
-            
+            //Se o filho não for iguai a raiz
             if(filho->left->contato->GetNome() != SalvarContato){
+                //Joga o pai para ser o filho a esquerda de seu filho
                 pai = filho->left;
 
             } 
+            //Se for a raiz pai = filho
             else{
+
                 pai  = filho;
 
             }
 
 
-
+            
             while(pai != nullptr){
+                //Descobrimos a onde está o nó que teve seu valor trocado em relação ao pai
+                //enquanto não acharmos buscamos a posição de seu pai
+                //Quando acharmos iremos verificar se o node deletado tinha filho ou não
+                //Se tiver filho ele será conectado ao pai, se não sera cortada a conexão
+                //Ao fim o node é deletado
                 if(pai->left == maisDireita){
                     
                     if(maisDireita->left != nullptr){
@@ -225,23 +242,51 @@ class Arvore{
 
         }
 
+        //Deleta um nó que só tenha um filho
         void DeletarNode1Filho(Node* pai, Node* filho){
-           Node* temporario = filho;
-           if(filho->left != nullptr){
+
+           //Cria um nó temporario na posição do filho que será deletado 
+          //Troca o ponteiro do filho para o seu filho
+            if(filho->left != nullptr){
                 filho = filho->left;
-           } 
-           else{
-                
+            } 
+            else{                        
                 filho = filho->right;
 
+           }       
+
+            // Se o deletado não for raiz
+           if(pai == filho){
+                Node* temporario = filho;
+
+                //Conecta o pai a nova posição do filho
+                if(pai->left == temporario){
+                    pai->left = filho;
+                }
+
+                else{
+                    pai->right = filho;
+                }
+                
+                //deleta temporario
+                delete temporario;
+
            }
-           if(pai->left == temporario){
-                pai->left = filho;
-           }
+
+            //Se o deletado for raiz
            else{
-                pai->right = filho;
+                //filho será raiz
+                raiz = filho;
+                //deleta pai
+                delete pai;
            }
-           delete temporario;
+
+      
+          
+     
+
+
+           //Deleta o temporario
         }
 
            //Imprime em ordem(mostra dados em ordem do menor para maior), indo do mais a esqueda -> raiz -> direita -> sobe e repete
@@ -338,26 +383,31 @@ class Arvore{
 
         }
 
-
+        //Remove um nó da arvore
         void Remover(string nome){
-            //cout << raiz->contato->GetNome() << "     " << nome;
-            
+
+            //Cria nó para o pai    
             Node* pai;
 
+            //Busca a posição do pai do valor buscado a partir da raiz
             pai = BuscarNodePai(raiz,nome);
             
+            //Verifica se o valor buscado existe antes de começar a deletar algo
             if(pai!=nullptr){
 
             
                 //Node pai do node buscado
                 Node* filho;
 
+                //Verifica se o nó buscado não é a propria raiz então ele não terá filho e sera o proprio pai
+
+                //Se não for raiz 
                 if(pai->contato->GetNome() != nome){
                     
                     filho = BuscarFilho(pai, nome);
                 }
 
-                //
+                //se for raiz filho será o proprio pai
                 else{
 
                     filho = pai;
@@ -385,6 +435,7 @@ class Arvore{
                     }
                 }
 
+                //Mensagem de sucesso
                 cout << "\nDeletado com sucesso" << endl;
                 quantidadeNodes--;
             }
