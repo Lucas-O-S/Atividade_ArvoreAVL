@@ -96,7 +96,7 @@ class Arvore{
             else{
                 
                 //Se for encontrado o nó pai do objetivo acaba
-                if(objetivo->left != nullptr && objetivo->left->contato->GetNome() == nome || objetivo->right != nullptr && objetivo->right->contato->GetNome() == nome){
+                if((objetivo->left != nullptr && objetivo->left->contato->GetNome() == nome) || (objetivo->right != nullptr && objetivo->right->contato->GetNome() == nome)){
                     return objetivo;
                 }
 
@@ -117,24 +117,7 @@ class Arvore{
 
         }
 
-        //Acha o Node filho que será deletado
-        Node* BuscarFilho(Node* pai, string nome){
-
-            //Se for o filho da esquerda
-            if(pai->left != nullptr && pai->left->contato->GetNome() == nome){
-                return pai->left;
-            }
-            
-            //Se for o filho mais a direita
-            else if(pai->right != nullptr && pai->right->contato->GetNome() == nome){
-                return pai->right;
-            }
-
-            //Se não achar;
-            else{
-                return nullptr;
-            }
-        }
+ 
 
         //Deleta nó folha com base em seu pai e filho
         void DeletarFolha(Node* pai, Node* filho){
@@ -247,36 +230,38 @@ class Arvore{
 
            //Cria um nó temporario na posição do filho que será deletado 
           //Troca o ponteiro do filho para o seu filho
+
+            Node* temporario = filho;
+
             if(filho->left != nullptr){
-                filho = filho->left;
+                temporario = filho->left;
             } 
             else{                        
-                filho = filho->right;
+                temporario = filho->right;
 
            }       
 
-            // Se o deletado não for raiz
-           if(pai == filho){
-                Node* temporario = filho;
+        // Se o deletado não for raiz
+           if(pai != filho){
 
                 //Conecta o pai a nova posição do filho
                 if(pai->left == temporario){
-                    pai->left = filho;
+                    pai->left = temporario;
                 }
 
                 else{
-                    pai->right = filho;
+                    pai->right = temporario;
                 }
                 
                 //deleta temporario
-                delete temporario;
+                delete filho;
 
            }
 
             //Se o deletado for raiz
            else{
                 //filho será raiz
-                raiz = filho;
+                raiz = temporario;
                 //deleta pai
                 delete pai;
            }
@@ -298,6 +283,21 @@ class Arvore{
             }
         }
 
+        
+        //Imprime em ordem(mostra dados em ordem do menor para maior), indo do mais a esqueda -> raiz -> direita -> sobe e repete considerando favoritos
+        void ImprimirEmOrdemFavoritos(Node* pai){
+            if(pai){
+                
+                ImprimirEmOrdemFavoritos(pai->left);
+                if(pai->contato->GetFavorito()){
+                    cout << pai->contato->MostrarDados();
+  
+                }
+                ImprimirEmOrdemFavoritos(pai->right);
+            }
+        }
+
+
         //Imprime em pré ordem, raiz -> filho a esqueda -> filho a direita
         void ImprimirPreOrdem(Node* pai){
             if(pai){
@@ -318,17 +318,8 @@ class Arvore{
 
             }
         }
-    
-    ;
 
-    public:
-
-        //Construtor de arvore
-        Arvore(){
-            raiz = nullptr;
-            quantidadeNodes = 0;
-        }
-
+        
         //Inseri um nó a arvore
         void inserir(Contato* contato){
 
@@ -383,6 +374,29 @@ class Arvore{
 
         }
 
+             //Faz a busca binaria da arvore com base no nome 
+        Node* BuscarBinaria(Node* raiz, string nome){
+            Node* nodeTemporario = raiz;
+                while(nodeTemporario != nullptr){
+
+                    //Se achar termina metodo
+                    if(nodeTemporario->contato->GetNome() == nome){
+                        return nodeTemporario;
+                    }
+
+                    //Se não continua buscando 
+                    if(nodeTemporario->contato->GetNome() < nome){
+                        nodeTemporario = nodeTemporario->right;
+                    }
+                    else{
+                        nodeTemporario = nodeTemporario->left;
+                    }
+                }
+
+            return nullptr;      
+            
+        }
+
         //Remove um nó da arvore
         void Remover(string nome){
 
@@ -404,7 +418,7 @@ class Arvore{
                 //Se não for raiz 
                 if(pai->contato->GetNome() != nome){
                     
-                    filho = BuscarFilho(pai, nome);
+                    filho = BuscarBinaria(pai, nome);
                 }
 
                 //se for raiz filho será o proprio pai
@@ -440,34 +454,126 @@ class Arvore{
                 quantidadeNodes--;
             }
         }
+    
+    ;
+
+    public:
+
+        //Construtor de arvore
+        Arvore(){
+            raiz = nullptr;
+            quantidadeNodes = 0;
+        }
+
+        //função para criar contato do 0
+        void CriarContato(){
+            string nome, numero, email;
+
+            cout << "\nNome do contato: ";
+            cin >> nome;
+
+            cout << "\nNumero do contato: ";
+            cin >> numero;
+
+            cout << "\nEmail do contato: ";
+            cin >> email;
+
+            cout << "\n";
+
+            Contato* contato = new Contato(nome, email, numero);
+            inserir(contato);
+
+            
+        }
+
+        //Sobrecarga que já recebe dados direto
+        void CriarContato(string nome,string numero, string  email){
+            Contato* contato = new Contato(nome, email, numero);
+            inserir(contato);
+        }
+        
+        //Deleta o contato pedio;
+        void Deletar(){
+            string nome;
+            cout << "Quem você deseja deletar: ";
+            cin >> nome;
+
+            Remover(nome);
+
+        }
+
+        //Mostra todos os favoritos;
+        void MostrarFavoritos(){
+
+            cout << "\nLista de favoritos:" << endl;
+
+            ImprimirEmOrdemFavoritos(raiz);
+        }
+
+        //Busca contato que será favoritado;
+        void Favoritar(){
+            
+            string nome;
+            cout << "Quem você deseja favoritar: ";
+            cin >> nome;
+            
+            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            
+            if(nodeBuscado != nullptr){
+                nodeBuscado->contato->Favoritar();
+                cout << "\nFavoritado com sucesso";
+            }
+            else{
+                
+                cout << "\n Contato não encontrado" << endl;            
+
+            }
+      
+            
+        }
+
+      //Busca contato que será desfavoritar;
+        void Desfavoritar(){
+            
+            string nome;
+            cout << "Quem você deseja desfavoritar: ";
+            cin >> nome;
+            
+            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            
+            if(nodeBuscado != nullptr){
+                nodeBuscado->contato->Desfavoritar();
+                cout << "\nDesfavoritado com sucesso";
+            }
+            else{
+                
+                cout << "\n Contato não encontrado" << endl;            
+
+            }
+      
+            
+        }
+      
+      
 
  
         //Faz a busca binaria da arvore com base no nome 
-        void Buscar(string nome){
-            Node* nodeTemporario = raiz;
-                while(nodeTemporario != nullptr){
-
-                    //Se achar termina metodo
-                    if(nodeTemporario->contato->GetNome() == nome){
-                        cout << "\n Contato encontrado: " << endl;
-                        cout << nodeTemporario->contato->MostrarDados();
-                        return;
-                    }
-
-                    //Se não continua buscando 
-                    if(nodeTemporario->contato->GetNome() < nome){
-                        nodeTemporario = nodeTemporario->right;
-                    }
-                    else{
-                        nodeTemporario = nodeTemporario->left;
-                    }
-                }
-
-                cout << "\n Contato não encontrado" << endl;
-
-
+        void Buscar(){
             
+            string nome;
+            cout << "Quem você deseja buscar: ";
+            cin >> nome;
+            
+            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            
+            if(nodeBuscado != nullptr){
+                cout << nodeBuscado->contato->MostrarDados();
+            }
+            else{
+                
+                cout << "\n Contato não encontrado" << endl;            
 
+            }
       
             
         }
