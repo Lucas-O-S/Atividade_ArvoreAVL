@@ -1,17 +1,49 @@
 #include "ArvoreAVL.cpp"
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
 
 
 using namespace std;
 
+void AcessarDados(Arvore* arvore){
+    
+    fstream arquivo("Contatos.csv");
+
+    if(arquivo.is_open()){
+        cout << "\nDados antigos encontrados, eles serão adicionados a lista" << endl; 
+
+
+        string linha;
+
+        while(getline(arquivo, linha)){
+            istringstream ss(linha);
+
+            string nome, email, numero;
+            getline(ss,nome,';');
+            getline(ss,email,';');
+            getline(ss,numero,';');
+
+
+            arvore->CriarContato(nome,numero,email);
+
+        }
+
+        arquivo.close();
+    }
+
+}
+
 int main(){
 
-    Arvore arvore;
+    Arvore* arvore = new Arvore;
 
     
     cout << "Acessando Lista de contatos:" << endl;
 
     //Colocar uma função que adiona contatos de um arquivo csv
+    AcessarDados(arvore);
 
     int escolha;
     bool repetir = true;
@@ -28,43 +60,43 @@ int main(){
         {
             case 1:
 
-                arvore.CriarContato();
+                arvore->CriarContato();
 
 
             break;
 
             case 2:
-                arvore.Deletar();
+                arvore->Deletar();
             
             break;
             
             case 3:
 
-                arvore.Buscar();
+                arvore->Buscar();
 
             break;
 
             case 4:
             
-                arvore.ConsultaAlfabetica();
+                arvore->ConsultaAlfabetica();
 
             break;
 
             case 5:
 
-                arvore.MostrarFavoritos();
+                arvore->MostrarFavoritos();
             
             break;
 
             case 6:
 
-                arvore.Favoritar();
+                arvore->Favoritar();
 
             break;
 
             case 7:
 
-                arvore.Desfavoritar();
+                arvore->Desfavoritar();
 
             break;
 
@@ -82,7 +114,7 @@ int main(){
   
         }
 
-   
+
 
     }
 

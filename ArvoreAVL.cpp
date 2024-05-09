@@ -9,9 +9,9 @@ class Arvore{
         Node* raiz; 
         int quantidadeNodes;
 
-        //
-        int alturaNode(Node* node){
-            if(node == NULL){
+        //Devolve a alture de um nó
+        int AlturaNode(Node* node){
+            if(node == nullptr){
                 return -1;
             }
             else{
@@ -26,41 +26,134 @@ class Arvore{
 
         //Retorna o fator de balanceamento do nó
         int FatorBalanceamento(Node* node){
-            if(node){
-                return alturaNode(node->left) - alturaNode(node->right);
+            if(node != nullptr){
+                return  AlturaNode(node->left) -  AlturaNode(node->right);
             }
-        }
-
-        //Devolve a altura da arvore atravez de chamada
-        
-        
-        
-        
-        
-        
-        
-        // recursivas
-        int AlturaArvore(Node* raiz){
-            
-            //Se não ouver um nó devolve -1
-            if(raiz == nullptr){
-                return -1;
-            }
-
             else{
-                //Se não usamos recursão para buscar mais nós a direita e a esqueda que receberão a altura de seus nós
-                int direita = AlturaArvore(raiz->right);
-                int  esquerda = AlturaArvore(raiz->left);
+                return 0;
+            }
+        }        
+        
+        
+       
+        //Faz uma rotação a esquerda e devolve uma nova raiz/pai
+        Node* RotacaoEsquerda(Node* pai){
 
-                //Ao fim de cada recursão recebemos a altura do maior nó mais 1
-                if(direita > esquerda){
-                    return direita + 1;
-                }
-                else{
-                    return esquerda + 1;
-                }
-            }   
+            //Cria um nó para o filho e para o possivel filho dele(Neto)
+            Node *filho, *neto;
+
+            //Filho recebe o valor do pai a direita
+            filho = pai->right;
+
+            //neto recebe o valor do filho a esquerda de filho
+            if(filho->left != nullptr){
+                neto = filho->left;
+                
+                //Raiz recebe o valor de um possivel neto como filho a direita
+                pai->right = neto;
+
+
+            }
+            else{
+                pai->right = nullptr;
+            }
+
+
+            
+            //pai vira filho de filho(Ratação a esquerda)
+            filho->left = pai;
+            pai->altura = MaiorAltura(AlturaNode(pai->left),AlturaNode(pai->right)) + 1;
+            filho->altura = MaiorAltura(AlturaNode(filho->left),AlturaNode(filho->right)) + 1;
+
+            return filho;
         }
+
+        //Faz uma rotação a direita e devolve uma nova raiz/pai
+        Node* RotacaoDireita(Node* pai){
+
+            //Cria um nó para o filho e para o possivel filho dele(Neto)
+            Node *filho, *neto;
+
+            //Filho recebe o valor do pai a esquerda
+            filho = pai->left;
+
+            //neto recebe o valor do filho a direita de filho
+            if(filho->right != nullptr){
+                neto = filho->right;
+                
+                //Raiz recebe o valor de um possivel neto como filho a esquerda
+                pai->left = neto;
+
+
+            }
+            else{
+                pai->left = nullptr;
+            }
+
+
+     
+            //pai vira filho de filho(Ratação a direita)
+            filho->right = pai;
+
+            filho->altura = MaiorAltura(AlturaNode(filho->left),AlturaNode(filho->right)) + 1;
+
+            //PAI tem sua altura atualizada e filho também
+            pai->altura = MaiorAltura(AlturaNode(pai->left),AlturaNode(pai->right)) + 1;
+            return filho;
+        }
+
+        //Rotação para a direita e depois a esquerda
+        Node* RotacaoDireitaEsquerda(Node * pai){
+
+            //Rotaciona a direita o filho a direita para o neto a esquerda
+            pai->right = RotacaoDireita(pai->right);
+            
+            //Depois rotaciona o pai para a esquerda de seu filho que era o neto antes
+            return RotacaoEsquerda(pai);
+        }
+
+        //Rotação para a direita e depois a esquerda
+        Node* RotacaoEsquerdaDireita(Node * pai){
+
+            //Rotaciona a esquerda o filho a esquerda para o neto a direita
+            pai->left = RotacaoEsquerda(pai->left);
+
+            //Depois rotaciona o pai para a direita de seu filho que era o noto antes       
+            return RotacaoDireita(pai);
+        }
+
+        //Verifica o fator de balanceamento e devolve o arvore balanceada
+        Node* Balancear(Node* pai){
+            int fatorBalanceamento = FatorBalanceamento(pai);
+        
+            //Para ser balanceado o fator de balanceamento de pai deve ser 1 ,0 ou -1
+            //fator de balanceamento de Pai = -2 ou menor e o do filho a direita for igual ou menor que 0 será rotacionado a esquerda
+            if(fatorBalanceamento < -1 && FatorBalanceamento(pai->right) <= 0){
+                pai = RotacaoEsquerda(pai);
+
+            }
+
+            //fator de balanceamento de Pai = 2 ou maior e o do filho a esquerda for igual ou maior que 0 será rotacionado a direita
+            else if(fatorBalanceamento > 1 && FatorBalanceamento(pai->left) >= 0){
+                pai = RotacaoDireita(pai);
+            }
+
+            //fator de balanceamento de Pai = 2 ou maior e o do filho a esquerda for menor que 0 será uma dupla rotação direita
+            else if(fatorBalanceamento > 1 && FatorBalanceamento(pai->left) < 0){
+                pai = RotacaoEsquerdaDireita(pai);
+            }
+
+            //fator de balanceamento de Pai = -2 ou menor e o do filho a direita for maior que 0 será uma dupla rotação esquerda
+               else if(fatorBalanceamento < -1 && FatorBalanceamento(pai->right) > 0){
+                pai = RotacaoDireitaEsquerda(pai);
+            }
+
+
+            //Devolve os nós
+            return pai;
+        }
+
+    
 
         //Função recursiva que devolve a quantidade de nós folhas da arvore
         int QuantidadeFolhas(Node* raiz){
@@ -81,67 +174,17 @@ class Arvore{
             //Ao final será somada a quantidade total de folhas 
         }
 
-        //Busca Node pai do deletado
-        Node* BuscarNodePai(Node* pai, string nome){
-
-            
-            Node* objetivo = pai;
-             //Se objetivo for um nó nulo;
-            if(objetivo == nullptr){
-                
-                cout << "\nvalor invalido" << endl;
-                return nullptr;
-            }
-
-            else{
-                
-                //Se for encontrado o nó pai do objetivo acaba
-                if((objetivo->left != nullptr && objetivo->left->contato->GetNome() == nome) || (objetivo->right != nullptr && objetivo->right->contato->GetNome() == nome)){
-                    return objetivo;
-                }
-
-                else{
-                    //Se não for encontrado o valor buscado entra-se em uma serie recursiva até achar o objetivo e devolver a função principal
-                    if(objetivo->contato->GetNome() > nome){
-                        objetivo = BuscarNodePai(objetivo->left,nome);
-                    }
-                    else if(objetivo->contato->GetNome() < nome){
-                        objetivo = BuscarNodePai(objetivo->right,nome);
-
-                    }
-                    return objetivo;
-                }
-            }
-
-
-
-        }
-
  
 
-        //Deleta nó folha com base em seu pai e filho
-        void DeletarFolha(Node* pai, Node* filho){
-
-            //Para deletar o filho é cortado a conexão com o pai e depois deletado
-            //Se for o nó da direita
-            if(pai->right == filho){
-
-                pai->right = nullptr;
-            }
-
-            //Se for o da esquerda
-            else{
-
-                pai->left =nullptr;
-            }
-
-            delete filho ;    
+        //Deleta nó folha
+        void DeletarFolha(Node* pai){
+            delete pai;    
         }
 
-        //Busca o nó mais a direita da esqueda do filho
-        Node* MaisDireita(Node* filho){
+        //Busca o nó mais a direita da esqueda de pai
+        Node* MaisDireita(Node* pai){
              //Salva o valor do filho a esquerda
-             Node* temp = filho->left;
+             Node* temp = pai->left;
 
             while(temp->right != nullptr){
                 temp = temp->right;
@@ -153,125 +196,38 @@ class Arvore{
         }
 
         //Deleta Nós com dois filhos
-        void DeletarNodeGrau2(Node* pai, Node* filho){
+        void DeletarNodeGrau2(Node* pai, Contato *contato){
 
-            //Salva o valor do nome procurado
-            string SalvarContato = filho->contato->GetNome();
-            
-            //Cria o node mais adireita da esquerda do filho
-            Node* maisDireita = MaisDireita(filho);
+            //Cria um nó temporario na posição mais a direita da esquerda de pai(Maio valor em relação a pai)
+            Node* temporario = MaisDireita(pai);
 
-            //Troca o dado de ambos os nós, só o contato não do ponteiro
-            Contato* DadoTemporario = maisDireita->contato;
-            maisDireita->contato = filho->contato;
-            filho->contato = DadoTemporario;
-            
-            //Se o filho não for iguai a raiz
-            if(filho->left->contato->GetNome() != SalvarContato){
-                //Joga o pai para ser o filho a esquerda de seu filho
-                pai = filho->left;
+            //Troca seus contatos salvos
+            pai ->contato = temporario->contato;
+            temporario->contato = contato;
 
-            } 
-            //Se for a raiz pai = filho
-            else{
-
-                pai  = filho;
-
-            }
-
-
-            
-            while(pai != nullptr){
-                //Descobrimos a onde está o nó que teve seu valor trocado em relação ao pai
-                //enquanto não acharmos buscamos a posição de seu pai
-                //Quando acharmos iremos verificar se o node deletado tinha filho ou não
-                //Se tiver filho ele será conectado ao pai, se não sera cortada a conexão
-                //Ao fim o node é deletado
-                if(pai->left == maisDireita){
-                    
-                    if(maisDireita->left != nullptr){
-                        pai->left = maisDireita->left;
-
-                    }
-                    else{
-                        pai->left = nullptr;
-
-                    }
-                    delete maisDireita;
-
-                    break;
-                }
-                else if(pai->right == maisDireita){
-                    if(maisDireita->left != nullptr){
-                        pai->right = maisDireita->left;
-
-                    }
-                    else{
-                        pai->right =  nullptr;
-                    }
-                    delete maisDireita;
-                    break;
-                }
-        
-                if(filho->contato->GetNome() > pai->contato->GetNome()){
-                    pai = pai->left;
-                    
-                }
-                else{
-                    pai = pai->right;
-                }
-            }
-
+            //Manda para deletar novamente só que agora o valor procurado estará em uma folha
+            pai->left = Remover(pai->left, temporario->contato->GetNome());
 
         }
 
-        //Deleta um nó que só tenha um filho
-        void DeletarNode1Filho(Node* pai, Node* filho){
+        //Deleta um nó que só tenha um filho e devolve o filho no lugar 
+        Node* DeletarNode1Filho(Node* pai){
 
-           //Cria um nó temporario na posição do filho que será deletado 
-          //Troca o ponteiro do filho para o seu filho
+            //Cria um nó temporario    
+            Node* temporario;
 
-            Node* temporario = filho;
+            //Verifica qual lado possui um filho
 
-            if(filho->left != nullptr){
-                temporario = filho->left;
-            } 
-            else{                        
-                temporario = filho->right;
-
-           }       
-
-        // Se o deletado não for raiz
-           if(pai != filho){
-
-                //Conecta o pai a nova posição do filho
-                if(pai->left == temporario){
-                    pai->left = temporario;
-                }
-
-                else{
-                    pai->right = temporario;
-                }
+            if(pai->left != nullptr){
+                temporario = pai->left;
+            }
+            else{
                 
-                //deleta temporario
-                delete filho;
+                temporario = pai->right;
+            }
 
-           }
-
-            //Se o deletado for raiz
-           else{
-                //filho será raiz
-                raiz = temporario;
-                //deleta pai
-                delete pai;
-           }
-
-      
-          
-     
-
-
-           //Deleta o temporario
+            delete pai;
+            return temporario;
         }
 
            //Imprime em ordem(mostra dados em ordem do menor para maior), indo do mais a esqueda -> raiz -> direita -> sobe e repete
@@ -320,62 +276,44 @@ class Arvore{
         }
 
         
-        //Inseri um nó a arvore
-        void inserir(Contato* contato){
+        //Inseri um nó a arvore de forma recursiva
+        Node* inserir(Node* pai, Contato* contato){
 
-            //Novo nó de contato
-            Node* novoNode = new Node(contato);
+            //Se pai for nulo adiciona o nó novo ao pai
+            if(pai == nullptr){
+                Node* novoNode = new Node(contato);
+                quantidadeNodes++;
+                return novoNode;
 
-            //Se raiz for nula adiciona o nó novo a raiz
-            if(raiz == nullptr){
-                raiz = novoNode;
             }
             else{
-
-                //Se não pegamos criamos um nó temporario que começa da raiz
-                Node* nodeTemp = raiz;
-                Node* nodePai = nullptr;
-
-                //enquanto não for nulo o nó folha verificamos em order alfabetica
-                while (nodeTemp != nullptr)
-                {
-                    nodePai = nodeTemp;
-                    //Se o nome vem depois(maior) então iremos a direita
-                    if(nodeTemp->contato->GetNome() < contato->GetNome()){
-                        nodeTemp = nodeTemp->right;
-                    }
-
-                    //Se o nome vem antes(menor) então iremos a esquerda
-                    else if(nodeTemp->contato->GetNome() > contato->GetNome()){
-                        nodeTemp = nodeTemp->left; 
-
-                    }
-                    //Ou se já existe, fazemos isso para evitar nomes iguais na arvore que daria problema já que em ordem alfabetica existe a possibilidade de nomes iguais
-                    else{
-                        cout << "\nContato já existe" << endl;
-                        return;
-                    }
-
+                //Busca a nova posição do nó 
+                if(contato->GetNome() < pai->contato->GetNome()){
+                    pai->left = inserir(pai->left, contato);
                 }
 
-                // A posição do node temporario será igual ao novo node
-                if(contato->GetNome() < nodePai->contato->GetNome()){
-                    nodePai->left = novoNode;
+                else if(contato->GetNome() > pai->contato->GetNome()){
+                    pai->right = inserir(pai->right, contato);
 
                 }
+                //Verifica se o contato já existe
                 else{
-                    nodePai->right = novoNode;
-
+                    cout << "\nContato já existe"<< endl;
                 }
+          
 
             }
-            //Soma-se mais um ao contador de nós
-            quantidadeNodes++;
+            //Recaucula a autura dos nós
+            pai->altura = MaiorAltura(AlturaNode(pai->left),AlturaNode(pai->right) ) +1; 
+            
+            //Verifica a partir da raiz o balanceamento
+            pai = Balancear(pai);
 
+            return pai;
         }
 
              //Faz a busca binaria da arvore com base no nome 
-        Node* BuscarBinaria(Node* raiz, string nome){
+        Node* BuscaBinaria(Node* raiz, string nome){
             Node* nodeTemporario = raiz;
                 while(nodeTemporario != nullptr){
 
@@ -397,62 +335,57 @@ class Arvore{
             
         }
 
-        //Remove um nó da arvore
-        void Remover(string nome){
+        //Remove um nó da arvore de forma recursiva
+        Node* Remover(Node* pai, string nome){
 
-            //Cria nó para o pai    
-            Node* pai;
-
-            //Busca a posição do pai do valor buscado a partir da raiz
-            pai = BuscarNodePai(raiz,nome);
-            
-            //Verifica se o valor buscado existe antes de começar a deletar algo
-            if(pai!=nullptr){
-
-            
-                //Node pai do node buscado
-                Node* filho;
-
-                //Verifica se o nó buscado não é a propria raiz então ele não terá filho e sera o proprio pai
-
-                //Se não for raiz 
-                if(pai->contato->GetNome() != nome){
-                    
-                    filho = BuscarBinaria(pai, nome);
-                }
-
-                //se for raiz filho será o proprio pai
-                else{
-
-                    filho = pai;
-                }
-
-
-                //Se for nó folha
-                if(filho->left == nullptr && filho->right == nullptr){
-                    
-                    DeletarFolha(pai,filho);
-
-                }
-                else{
-                    //Se for nó com dois filhos
-                    
-                    if(filho->left != nullptr && filho->right != nullptr){
-                        DeletarNodeGrau2(pai, filho);
-                    
-
-                    }
-
-                    //Node com um filho
-                    else{
-                        DeletarNode1Filho(pai,filho);
-                    }
-                }
-
-                //Mensagem de sucesso
-                cout << "\nDeletado com sucesso" << endl;
-                quantidadeNodes--;
+            //Verifica se achou o nome
+            if(pai == nullptr){
+                cout << "\nNão foi possivel achar o contato" << endl;
+                return nullptr;
             }
+
+            if(pai->contato->GetNome() == nome){
+                if(pai->left == nullptr && pai->right == nullptr){
+                    DeletarFolha(pai);
+                    quantidadeNodes--;
+
+                    return nullptr;
+                }
+                else{
+                    //Nó de segundo grau
+                    if(pai->left != nullptr && pai->right != nullptr){
+                        DeletarNodeGrau2(pai, pai->contato);
+                        quantidadeNodes--;
+
+                        return pai;
+
+                    }
+
+                    //Apenas um filho
+                    else{
+                        return DeletarNode1Filho(pai);
+                        quantidadeNodes--;
+
+                    }
+                }
+            }
+            //Busca o nó correto
+            else{
+                if(nome < pai->contato->GetNome()){
+                    pai->left = Remover(pai->left,nome);
+
+                }
+                else{
+                    pai->right = Remover(pai->right,nome);
+
+                }
+            }
+            
+            //Verifica se está balanceado e faz se nescessario
+            pai = Balancear(pai);
+
+            return pai;
+
         }
     
     ;
@@ -481,15 +414,15 @@ class Arvore{
             cout << "\n";
 
             Contato* contato = new Contato(nome, email, numero);
-            inserir(contato);
+            raiz = inserir(raiz, contato);
 
             
         }
 
         //Sobrecarga que já recebe dados direto
         void CriarContato(string nome,string numero, string  email){
-            Contato* contato = new Contato(nome, email, numero);
-            inserir(contato);
+            Contato* contato = new Contato(nome, numero, email);
+            raiz = inserir(raiz, contato);
         }
         
         //Deleta o contato pedio;
@@ -498,7 +431,16 @@ class Arvore{
             cout << "Quem você deseja deletar: ";
             cin >> nome;
 
-            Remover(nome);
+            raiz = Remover(raiz, nome);
+
+
+        }
+
+        //Sobrecarga de Deleta o contato pedio;
+        void Deletar( string nome){
+
+            raiz = Remover(raiz, nome);
+
 
         }
 
@@ -517,7 +459,7 @@ class Arvore{
             cout << "Quem você deseja favoritar: ";
             cin >> nome;
             
-            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            Node* nodeBuscado = BuscaBinaria(raiz, nome);
             
             if(nodeBuscado != nullptr){
                 nodeBuscado->contato->Favoritar();
@@ -539,7 +481,7 @@ class Arvore{
             cout << "Quem você deseja desfavoritar: ";
             cin >> nome;
             
-            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            Node* nodeBuscado = BuscaBinaria(raiz, nome);
             
             if(nodeBuscado != nullptr){
                 nodeBuscado->contato->Desfavoritar();
@@ -554,8 +496,6 @@ class Arvore{
             
         }
       
-      
-
  
         //Faz a busca binaria da arvore com base no nome 
         void Buscar(){
@@ -564,7 +504,7 @@ class Arvore{
             cout << "Quem você deseja buscar: ";
             cin >> nome;
             
-            Node* nodeBuscado = BuscarBinaria(raiz, nome);
+            Node* nodeBuscado = BuscaBinaria(raiz, nome);
             
             if(nodeBuscado != nullptr){
                 cout << nodeBuscado->contato->MostrarDados();
@@ -582,7 +522,7 @@ class Arvore{
         int BuscarAltura(){
 
             //Usa uma função recursiva para calcular a altura da arvore
-            return AlturaArvore(raiz);
+            return AlturaNode(raiz);
         }
 
         //Devolve a quantidade de Nós da arvore
@@ -602,7 +542,14 @@ class Arvore{
         void ConsultaAlfabetica(){
             ImprimirEmOrdem(raiz);
         }
+
+        //Devolve o valor da raiz
+        string GetRaiz(){
+            return raiz->contato->MostrarDados();
+        }
     ;
+
+
 
 
 };
