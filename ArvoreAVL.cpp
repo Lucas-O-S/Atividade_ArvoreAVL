@@ -355,7 +355,6 @@ class Arvore{
                     //Nó de segundo grau
                     if(pai->left != nullptr && pai->right != nullptr){
                         DeletarNodeGrau2(pai, pai->contato);
-                        quantidadeNodes--;
 
                         return pai;
 
@@ -363,8 +362,8 @@ class Arvore{
 
                     //Apenas um filho
                     else{
-                        return DeletarNode1Filho(pai);
                         quantidadeNodes--;
+                        return DeletarNode1Filho(pai);
 
                     }
                 }
@@ -545,7 +544,7 @@ class Arvore{
 
         //Devolve o valor da raiz
         string GetRaiz(){
-            return raiz->contato->MostrarDados();
+            return raiz->contato->GetNome();
         }
     ;
 
